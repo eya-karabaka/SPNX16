@@ -12,10 +12,10 @@ Chiffrement (bloc par bloc) :
 Déchiffrement : exactement l'inverse, dans l'ordre inverse des rounds.
 """
 
-from core.sbox        import substituer_bloc
-from core.permutation import permuter
-from core.key_schedule import key_schedule
-from core.padding     import (ajouter_padding, retirer_padding,
+from sbox        import substituer_bloc
+from permutation import permuter
+from key_schedule import key_schedule
+from padding     import (ajouter_padding, retirer_padding,
                                message_vers_octets, octets_vers_message)
 
 
@@ -24,13 +24,10 @@ from core.padding     import (ajouter_padding, retirer_padding,
 def chiffrer_bloc(bloc: int, sous_cles: list) -> int:
     """
     Chiffre un seul bloc de 8 bits à travers les 4 rounds de SPNX-16.
-
-    Args:
-        bloc      : entier 0-255 (8 bits) — le bloc à chiffrer
-        sous_cles : liste [K1, K2, K3, K4, K5] générée par key_schedule()
-
-    Returns:
-        entier 0-255 — le bloc chiffré
+    - Args: bloc : entier 0-255 (8 bits) = le bloc à chiffrer
+            sous_cles : liste [K1, K2, K3, K4, K5] générée par key_schedule()
+    - Returns:
+            entier 0-255 — le bloc chiffré
     """
     K1, K2, K3, K4, K5 = sous_cles
 
@@ -61,18 +58,15 @@ def chiffrer_bloc(bloc: int, sous_cles: list) -> int:
 
 def dechiffrer_bloc(bloc: int, sous_cles: list) -> int:
     """
-    Déchiffre un seul bloc de 8 bits — inverse exact de chiffrer_bloc().
-
-    Ordre inverse des rounds, opérations inversées :
+    - Déchiffre un seul bloc de 8 bits — inverse exact de chiffrer_bloc().
+    - Ordre inverse des rounds, opérations inversées :
         - XOR est sa propre inverse  (A ^ K ^ K = A)
         - Substitution inverse       (INV_SBOX)
         - Permutation inverse        (INV_PERM)
-
-    Args:
-        bloc      : entier 0-255 (8 bits) — le bloc chiffré
-        sous_cles : liste [K1, K2, K3, K4, K5]
-
-    Returns:
+    - Args:
+        - bloc      : entier 0-255 (8 bits) — le bloc chiffré
+        - sous_cles : liste [K1, K2, K3, K4, K5]
+    - Returns:
         entier 0-255 — le bloc déchiffré
     """
     K1, K2, K3, K4, K5 = sous_cles
@@ -104,16 +98,15 @@ def dechiffrer_bloc(bloc: int, sous_cles: list) -> int:
 
 def chiffrer(message: str, cle: int) -> bytes:
     """
-    Chiffre un message texte complet avec SPNX-16.
-
-    Étapes :
+    - Chiffre un message texte complet avec SPNX-16.
+    - Étapes :
         1. Convertir le texte en octets UTF-8
         2. Ajouter le padding
         3. Chiffrer chaque octet (bloc de 8 bits) indépendamment
 
     Args:
-        message : str — le texte en clair
-        cle     : int — clé de 16 bits (0 à 65535)
+        message : str = le texte en clair
+        cle     : int = clé de 16 bits (0 à 65535)
 
     Returns:
         bytes — le message chiffré
@@ -133,19 +126,16 @@ def chiffrer(message: str, cle: int) -> bytes:
 
 def dechiffrer(message_chiffre: bytes, cle: int) -> str:
     """
-    Déchiffre un message chiffré avec SPNX-16.
-
-    Étapes :
+    - Déchiffre un message chiffré avec SPNX-16.
+    - Étapes :
         1. Déchiffrer chaque octet indépendamment
         2. Retirer le padding
         3. Décoder les octets en texte UTF-8
-
-    Args:
-        message_chiffre : bytes — le message chiffré
-        cle             : int   — clé de 16 bits (0 à 65535)
-
-    Returns:
-        str — le message déchiffré
+    - Args:
+         message_chiffre : bytes — le message chiffré
+         cle             : int   — clé de 16 bits (0 à 65535)
+    - Returns:
+         str — le message déchiffré
     """
     sous_cles = key_schedule(cle)
 
@@ -176,15 +166,15 @@ if __name__ == "__main__":
     print(f"  Message clair : {repr(message)}")
     print(f"  Chiffré (hex) : {chiffre.hex()}")
     print(f"  Déchiffré     : {repr(dechiffre)}")
-    print(f"\n  Réversibilité : {'✅ OK' if dechiffre == message else '❌ ERREUR'}")
+    print(f"\n  Réversibilité : {' OK' if dechiffre == message else ' ERREUR'}")
 
     # Test déterminisme
     chiffre2 = chiffrer(message, cle)
-    print(f"  Déterminisme  : {'✅ OK' if chiffre == chiffre2 else '❌ ERREUR'}")
+    print(f"  Déterminisme  : {' OK' if chiffre == chiffre2 else ' ERREUR'}")
 
     # Test sensibilité clé
     cle2     = cle ^ 1   # On change 1 seul bit de la clé
     chiffre3 = chiffrer(message, cle2)
-    print(f"  Sensib. clé   : {'✅ OK' if chiffre != chiffre3 else '❌ ERREUR'}")
+    print(f"  Sensib. clé   : {' OK' if chiffre != chiffre3 else ' ERREUR'}")
 
     print("=" * 50)
